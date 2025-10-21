@@ -1,0 +1,168 @@
+[33m2d519099[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m 测试添加
+[33m9c25707e[m 重新提交项目文件
+[33m54b11fc3[m Update OmsOrderReturnApplyResult.java
+[33m7a1ca5d1[m Update GlobalCorsConfig.java
+[33m2066a552[m Update UmsMenuServiceImpl.java
+[33m83fe3e70[m Update UmsAdminServiceImpl.java
+[33mbbd593e8[m Update UmsAdminCacheService.java
+[33m8a6579db[m Update SmsHomeBrandService.java
+[33m6bea1cbb[m Update SmsHomeAdvertiseService.java
+[33m82944a4d[m Update SmsFlashPromotionService.java
+[33m5fb63b01[m Update SmsHomeRecommendSubjectService.java
+[33mcb6c5954[m Update SmsHomeRecommendProductService.java
+[33m91765044[m Update SmsHomeNewProductService.java
+[33mf1f7b1a0[m Update SmsHomeBrandService.java
+[33mf37b8c36[m Update SmsFlashPromotionService.java
+[33m5b14c5fc[m Update SmsFlashPromotionProductRelationService.java
+[33m037314f9[m Update SmsFlashPromotionProductRelationService.java
+[33m2b169f29[m Update README.md
+[33m6d878ff9[m Update LICENSE
+[33m88f0d910[m Update SmsFlashPromotionSessionService.java
+[33m782f0d43[m Update SmsFlashPromotionSessionService.java
+[33mc824eacd[m Update OmsPortalOrderServiceImpl.java
+[33m7842367e[m 使用aliyun的镜像源提升插件下载速度
+[33m72f47591[m Update MemberAttentionController.java
+[33mfcfb7998[m Update MemberAttentionService.java
+[33m370eb4b7[m Update HomeService.java
+[33m4be013f7[m Update README.md
+[33m5e9608d2[m 部署文档路径修改
+[33m2d32c860[m 解决优惠券使用门槛为小数的精度丢失问题
+[33mc6a225ff[m Update SecurityConfig.java
+[33m0511fc48[m Update SmsHomeRecommendSubjectController.java
+[33mcf9ddbf5[m Update HomeController.java
+[33m70a226f4[m Update JacksonConfig.java
+[33mea6f1c14[m Update OrderTimeOutCancelTask.java
+[33m466a7964[m Update RabbitMqConfig.java
+[33m6db39ffe[m Update JacksonConfig.java
+[33mfb4c49d9[m 添加分支说明
+[33m215bc0e4[m 登出功能添加清空用户缓存逻辑
+[33m03bcfa2e[m Update PmsProductServiceImpl.java
+[33m0abe0533[m 库存问题修复
+[33me20208d0[m Update DemoController.java
+[33m5672156c[m Update PmsProductCategoryParam.java
+[33m0cceb040[m Update CancelOrderReceiver.java
+[33m92817d4f[m Update PmsProductAttributeParam.java
+[33mca75b719[m Update PmsSkuStockService.java
+[33mdd617ac3[m[33m ([m[1;33mtag: [m[1;33mv1.0.3[m[33m)[m Update PmsProductService.java
+[33m831851d8[m Update PmsProductService.java
+[33m33f1226b[m Update UmsMemberReceiveAddressController.java
+[33m449e5f0c[m Update MemberAttentionController.java
+[33m89595e4e[m Update MemberAttentionController.java
+[33mcca37a7f[m Update JacksonConfig.java
+[33mad17acff[m Update PmsProductAttributeService.java
+[33m27356463[m Update README.md
+[33me506d628[m Update LICENSE
+[33mbbe351cf[m Update OmsOrderService.java
+[33m23e6d568[m Redis配置类修改
+[33mfa0f151e[m Update UmsAdminCacheServiceImpl.java
+[33m2457f1d2[m 删除用户缓存逻辑修改
+[33m684eb7d5[m Update README.md
+[33m3a63e174[m Swagger配置修改
+[33m787bef48[m Update MemberAttentionServiceImpl.java
+[33mec4eaed5[m Update README.md
+[33mad309db9[m 说明文档图片修改
+[33m99df6e64[m Update EsProductService.java
+[33mddfedbfe[m Update EsProductService.java
+[33m88fb9993[m Update docker-compose-env.yml
+[33m83a62e53[m Update UmsAdminServiceImpl.java
+[33m63334846[m Update README.md
+[33m6c33602f[m 获取用户资源逻辑修改
+[33m0d416f29[m Update AlipayController.java
+[33mf3747c80[m 修改支付状态查询逻辑
+[33mb3bc051e[m 添加支付功能
+[33m9b4343e4[m Update Dockerfile
+[33mc7c76aa0[m Update README.md
+[33mccee44e4[m Update CmsPrefrenceAreaService.java
+[33m12fdf760[m Update UmsMemberController.java
+[33m02b9f532[m Update RedisConfig.java
+[33m83dccef7[m Update README.md
+[33m13c38362[m Update README.md
+[33m903f26f6[m 生成订单添加地址校验逻辑
+[33m6a189507[m Update PmsDaoTests.java
+[33m8211a232[m Update docker-compose-env.yml
+[33m96828ced[m Update UmsRoleServiceImpl.java
+[33m2749f7c5[m 修改收货地址问题先修复
+[33m0387c981[m 批量更新商品sku时添加对pid的限制
+[33mf4ab3a60[m 更新业务架构图
+[33m9cb70e63[m 更新系统架构图
+[33mb72cdc8b[m Update README.md
+[33me06bb1b6[m mall-search排除redis依赖
+[33mbd356282[m 更新项目开发进度图
+[33mc8cf97f6[m 下单库存问题修复
+[33m0a6717f3[m Update docker-compose-env.yml
+[33m076bd094[m Update README.md
+[33mb4a9db78[m 添加业务架构图
+[33md8b01545[m 业务架构图修改
+[33m08492fa0[m Update SmsHomeRecommendProductServiceImpl.java
+[33m214c23b4[m Update docker-compose-env.yml
+[33m8c0df1da[m Update SmsHomeNewProductServiceImpl.java
+[33m3a4e7178[m Update docker-compose-env.yml
+[33m5b907b69[m Update README.md
+[33mc710cfb2[m Update docker-compose-env.yml
+[33ma7f5964e[m Update docker-compose-env.yml
+[33m333b145d[m 添加前台商城技术栈
+[33mdb75640b[m 添加前台商城系统徽章
+[33m32b34934[m Update README.md
+[33m0127cde1[m 前台商城系统相关内容修改
+[33m2d11ba7f[m Update OmsOrderReturnApplyDao.java
+[33mf0811e85[m Update PmsProductAttributeValueDao.java
+[33mf2647f2e[m 添加mongo插入数据的控制逻辑
+[33ma0d0dd13[m 全局异常处理逻辑完善
+[33m137e1510[m SQL脚本更新
+[33ma2b3bb17[m Update MemberProductCollectionRepository.java
+[33ma3511312[m Update SmsHomeBrandServiceImpl.java
+[33mbbbb18b5[m Update JacksonConfig.java
+[33mfed52731[m Update SmsHomeRecommendSubjectServiceImpl.java
+[33m2be51beb[m Update UmsAdminServiceImpl.java
+[33m7ff60a1b[m Update docker-compose-env.yml
+[33mf61c8a50[m Update UmsAdminServiceImpl.java
+[33mf7fcf077[m Update SmsFlashPromotionController.java
+[33md6c7c277[m Update EsProductServiceImpl.java
+[33me21cfe58[m Update SmsFlashPromotionProductRelationController.java
+[33m15eeee26[m Update OmsOrderReturnApplyDao.xml
+[33m39a838a0[m Update PmsPortalBrandController.java
+[33m95b4b6cd[m Update UmsResourceCategoryController.java
+[33m93652291[m Update SmsHomeAdvertiseServiceImpl.java
+[33mea2d0464[m Update PmsProductQueryParam.java
+[33ma69b3a73[m SQL脚本更新
+[33m12112303[m Update SmsFlashPromotionServiceImpl.java
+[33m2c9c9dca[m Update PmsProductParam.java
+[33m94064db3[m Update SmsCouponServiceImpl.java
+[33m863e9d57[m Update PmsProductCategoryParam.java
+[33m36ffe7eb[m Update PmsPortalProductServiceImpl.java
+[33m057f2b9c[m Update SmsCouponHistoryServiceImpl.java
+[33md0596617[m Update PmsProductAttributeParam.java
+[33m9230fae1[m Update UmsMenuServiceImpl.java
+[33m1d5e4569[m Update PmsSkuStockServiceImpl.java
+[33m08ebb7b6[m SQL脚本更新
+[33ma0282c1e[m Update ProductAttrInfo.java
+[33m7ce073aa[m Update SecurityConfig.java
+[33m8883dcfc[m Update PmsBrandParam.java
+[33m3c7f48d0[m Update PmsProductServiceImpl.java
+[33m1b322853[m Docker Compose 部署文件修改
+[33m9d290b33[m Update Dockerfile
+[33m96054944[m Update pom.xml
+[33mb0bd1dd5[m Update DynamicSecurityService.java
+[33me6a85867[m Update CacheException.java
+[33maf87859d[m Update RestfulAccessDeniedHandler.java
+[33m32e7ea3e[m Update RestAuthenticationEntryPoint.java
+[33m7ae17e9f[m Update SmsFlashPromotion.java
+[33m81ff4e32[m 修复ES nested类型无法自动创建问题
+[33m87610b30[m 获取商品详情查询修改
+[33m40ec9c5f[m 日志切面逻辑修改
+[33m2c135760[m Update MemberDetails.java
+[33m93451da6[m Update SwaggerConfig.java
+[33m149710b8[m Update LICENSE
+[33me68af289[m Update CancelOrderSender.java
+[33m174f7e35[m Update CancelOrderReceiver.java
+[33m00d1aebe[m Update AdminUserDetails.java
+[33m28d93250[m Update SwaggerConfig.java
+[33me500cca3[m Update Generator.java
+[33m13b7be0b[m Update GlobalExceptionHandler.java
+[33m53b0acdf[m Update RedisServiceImpl.java
+[33me6bd6a33[m 前台商城品牌接口修改
+[33mfed8f5b0[m Update SecurityConfig.java
+[33m9d9c07ab[m 通用API封装对象注释修改
+[33mcebc5736[m Update README.md
+[33mf5b42329[m Spring Security配置修改
+[33m6f24d9b3[m Update MinioController.java

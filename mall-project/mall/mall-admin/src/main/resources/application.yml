@@ -11,6 +11,7 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
 
+
 mybatis:
   mapper-locations:
     - classpath:dao/*.xml

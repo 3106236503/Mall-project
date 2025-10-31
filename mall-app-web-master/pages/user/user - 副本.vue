@@ -52,20 +52,73 @@
 				</view>
 			</view>
 
-			<!-- 签到入口（改造后） -->
-			<view class="sign-entry-section" v-if="hasLogin">
-				<view class="entry-card">
-					<view class="entry-header">
-						<text class="entry-title">每日签到</text>
-						<text class="entry-desc">已连续签到 {{continuousDays}} 天</text>
+			<!-- 签到+补签区域 -->
+			<view class="sign-section" v-if="hasLogin">
+				<view class="loading" v-if="pageLoading">
+					<view class="loading-spinner"></view>
+					<text class="loading-text">加载签到数据中...</text>
+				</view>
+
+				<view class="sign-content" v-else>
+					<view class="sign-header">
+						<text class="sign-title">每日签到</text>
+						<view class="sign-streak">
+							<text class="streak-icon">🔥</text>
+							<text class="streak-text">连续签到 {{continuousDays}} 天</text>
+						</view>
 					</view>
-					<!-- 点击跳转到签到记录页面 -->
-					<view class="goto-sign-btn" @click="navTo('/pages/user/sigin')">
-						<text class="btn-text">前往签到</text>
-						<text class="btn-icon">→</text>
+
+					<view class="sign-btn loading" v-if="signLoading">
+						<view class="btn-spinner"></view>
+						<text class="btn-text">签到中...</text>
 					</view>
-					<view class="entry-footer">
-						<text class="footer-text">签到可获积分，补签功能在记录页</text>
+					<view 
+						class="sign-btn can-sign" 
+						@click="handleSign"
+						v-else-if="!todayStatus.signed"
+					>
+						<text class="btn-text">今日签到 +{{todayReward}}积分</text>
+					</view>
+					<view class="signed-btn" v-else>
+						<text class="signed-icon">✅</text>
+						<text class="signed-text">今日已签到</text>
+					</view>
+
+					<view class="makeup-area" v-if="makeupDates.length > 0">
+						<view class="makeup-header">
+							<text class="makeup-title">可补签日期</text>
+							<text class="makeup-desc">近3天内有 {{makeupDates.length}} 天未签到，补签需消耗50积分/天</text>
+						</view>
+						
+						<view class="date-selector">
+							<picker 
+								mode="date" 
+								:start="startDate" 
+								:end="yesterday" 
+								:value="selectedMakeupDate"
+								@change="onDateChange"
+							>
+								<view class="picker-view">
+									<text class="picker-icon">📅</text>
+									<text>选择补签日期：{{selectedMakeupDate}}</text>
+								</view>
+							</picker>
+						</view>
+						
+						<view class="makeup-btn-container">
+							<button 
+								class="makeup-btn" 
+								@click="handleMakeup"
+								:disabled="makeupLoading"
+							>
+								<text v-if="!makeupLoading">
+									<text class="makeup-icon">🌟</text>确认补签（消耗50积分）
+								</text>
+								<text v-if="makeupLoading">
+									<view class="makeup-spinner"></view>补签中...
+								</text>
+							</button>
+						</view>
 					</view>
 				</view>
 			</view>
@@ -150,10 +203,44 @@
 					@eventClick="navTo('/pages/set/set')"
 					hover-class="list-cell-hover"
 				></list-cell>
+				
+	
+				
+			
 			</view>
 		</view>
 
-		<!-- 错误提示弹窗 -->
+		<!-- 弹窗组件 -->
+		<view class="popup-mask" v-if="showSuccessPopup" @click="closePopup">
+			<view class="popup-content success" @click.stop>
+				<text class="popup-icon">🎉</text>
+				<text class="popup-title">签到成功</text>
+				<text class="popup-desc">获得 {{rewardInfo.points}} 积分 + {{rewardInfo.growth}} 成长值</text>
+				<text class="popup-streak">当前连续签到 {{continuousDays + 1}} 天</text>
+				<button class="popup-confirm success-confirm" @click.stop="closePopup">确定</button>
+			</view>
+		</view>
+
+		<view class="popup-mask" v-if="showMakeupPopup" @click="closePopup">
+			<view class="popup-content makeup" @click.stop>
+				<text class="popup-icon">🌟</text>
+				<text class="popup-title">补签成功</text>
+				<text class="popup-desc">已成功补签 {{selectedMakeupDate}}</text>
+				<text class="popup-cost">消耗 50 积分，剩余积分：{{(userInfo.integration || 0) - 50}}</text>
+				<button class="popup-confirm makeup-confirm" @click.stop="closePopup">确定</button>
+			</view>
+		</view>
+
+		<view class="popup-mask" v-if="showSystemErrorPopup" @click="closePopup">
+			<view class="popup-content system-error" @click.stop>
+				<text class="popup-icon">⚠️</text>
+				<text class="popup-title">系统提示</text>
+				<text class="popup-desc">{{systemErrorMsg}}</text>
+				<text class="popup-tip">建议稍后重试或联系客服~</text>
+				<button class="popup-confirm error-confirm" @click.stop="closePopup">知道了</button>
+			</view>
+		</view>
+
 		<view class="custom-error-popup" v-if="showCustomError">
 			<view class="error-content" :animation="errorAnimation">
 				<text class="error-icon">⚠️</text>
@@ -167,10 +254,23 @@
 import listCell from '@/components/mix-list-cell';
 import { fetchMemberCouponList } from '@/api/coupon.js';
 import { 
+  getTodaySignInStatus,
+  doSignIn, 
+  doMakeUpSignIn, 
+  getSignInRecords, 
   getContinuousSignInDays,
-  getMemberPoints
+  getMemberPoints // 导入积分成长值查询接口
 } from '@/api/signin.js';
 import { mapState } from 'vuex';  
+
+const formatDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const getDateFromISO = (isoStr) => isoStr?.split('T')[0] || '';
 
 let startY = 0, moveY = 0, pageAtTop = true;
 export default {
@@ -182,10 +282,27 @@ export default {
       moving: false,
       couponCount: 0,
       pageLoading: true,
-      continuousDays: 0, // 连续签到天数
+      
+      todayStatus: { signed: false, makeup: false },
+      continuousDays: 0,
+      makeupDates: [],
+      todayReward: 5,
+      
+      signLoading: false,
+      makeupLoading: false,
+      
+      selectedMakeupDate: '',
+      startDate: '',
+      yesterday: '',
+      
+      showSuccessPopup: false,
+      showMakeupPopup: false,
+      showSystemErrorPopup: false,
       showCustomError: false,
+      systemErrorMsg: '',
       customErrorMsg: '',
-      errorAnimation: {}
+      errorAnimation: {},
+      rewardInfo: { points: 0, growth: 0 }
     };
   },
   computed: {
@@ -195,36 +312,88 @@ export default {
     if (this.hasLogin) {
       this.fetchCouponCount();
       this.initSignData();
-      this.fetchMemberPoints();
+      this.fetchMemberPoints(); // 加载时查询积分和成长值
     } else {
       this.couponCount = 0;
       this.pageLoading = false;
     }
   },
+  onLoad() {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    
+    const threeDaysAgo = new Date(today);
+    threeDaysAgo.setDate(today.getDate() - 3);
+    
+    this.startDate = formatDate(threeDaysAgo);
+    this.yesterday = formatDate(yesterday);
+    this.selectedMakeupDate = this.yesterday;
+  },
   methods: {
-    // 查询会员积分和成长值
+    // 新增：查询会员积分和成长值
     async fetchMemberPoints() {
       try {
         const res = await getMemberPoints();
         const pointsData = res.data;
-        this.$store.commit('updateIntegration', pointsData.integration);
-        this.$store.commit('updateGrowth', pointsData.growth);
+        // 更新Vuex中的积分和成长值
+        this.$store.commit('updateIntegration', pointsData.totalIntegration);
+        this.$store.commit('updateGrowth', pointsData.totalGrowth);
       } catch (err) {
-        this.showErrorPopup('查询积分失败，请稍后重试');
+        this.showErrorPopup('查询积分和成长值失败，请稍后重试');
+        this.$store.commit('updateIntegration', 0);
+        this.$store.commit('updateGrowth', 0);
       }
     },
 
-    // 初始化签到数据（仅获取连续天数）
     async initSignData() {
       this.pageLoading = true;
       try {
-        const daysRes = await getContinuousSignInDays();
+        const statusRes = await getTodaySignInStatus();
+        const statusData = statusRes.data;
+        this.todayStatus = {
+          signed: !statusData.success,
+          makeup: statusData.makeup || false
+        };
+
+        const [daysRes, recordsRes] = await Promise.all([
+          getContinuousSignInDays(),
+          getSignInRecords(new Date().getFullYear(), new Date().getMonth() + 1)
+        ]);
+        
         this.continuousDays = daysRes.data || 0;
+        this.makeupDates = this.calcMakeupDates(recordsRes.data);
+        this.calcTodayReward();
+
       } catch (err) {
-        this.showErrorPopup('加载签到数据失败');
+        this.systemErrorMsg = '加载签到数据失败，请稍后重试';
+        this.showSystemErrorPopup = true;
       } finally {
         this.pageLoading = false;
       }
+    },
+
+    calcMakeupDates(records) {
+      const today = new Date();
+      const recent3Days = [];
+      for (let i = 1; i <= 3; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        recent3Days.push(formatDate(d));
+      }
+
+      const signedDates = records.map(item => getDateFromISO(item.signInDate));
+      return recent3Days.filter(date => !signedDates.includes(date));
+    },
+
+    calcTodayReward() {
+      if (this.todayStatus.signed) {
+        this.todayReward = 0;
+        return;
+      }
+      const rewards = [5, 8, 10, 12, 15, 18, 20];
+      const index = this.continuousDays % rewards.length;
+      this.todayReward = rewards[index];
     },
 
     fetchCouponCount() {
@@ -266,6 +435,44 @@ export default {
       this.coverTransform = 'translateY(0px)';
     },
 
+    async handleSign() {
+      if (this.todayStatus.signed || this.signLoading) return;
+      this.signLoading = true;
+
+      try {
+        const res = await doSignIn();
+        const signData = res.data;
+        
+        this.rewardInfo = {
+          points: signData.integration || 0,
+          growth: signData.growth || 0
+        };
+        this.showSuccessPopup = true;
+        
+        this.todayStatus.signed = true;
+        this.continuousDays += 1;
+        this.$store.commit('updateIntegration', (this.userInfo.integration || 0) + this.rewardInfo.points);
+        this.$store.commit('updateGrowth', (this.userInfo.growth || 0) + this.rewardInfo.growth);
+
+      } catch (err) {
+        const errorMsg = err.response?.data?.message || err.message || '签到失败';
+        if (errorMsg.includes('已经签到过了')) {
+          uni.showToast({ title: '今天已经签到过啦～', icon: 'none', duration: 1500 });
+          this.todayStatus.signed = true;
+        } else {
+          this.systemErrorMsg = errorMsg;
+          this.showSystemErrorPopup = true;
+        }
+
+      } finally {
+        this.signLoading = false;
+      }
+    },
+
+    onDateChange(e) {
+      this.selectedMakeupDate = e.detail.value;
+    },
+
     showErrorPopup(msg) {
       this.customErrorMsg = msg;
       this.showCustomError = true;
@@ -278,6 +485,48 @@ export default {
       setTimeout(() => {
         this.showCustomError = false;
       }, 3000);
+    },
+
+    async handleMakeup() {
+      const currentPoints = this.userInfo.integration || 0;
+      if (currentPoints < 50) {
+        this.showErrorPopup('积分不足50，无法补签哦～');
+        return;
+      }
+      if (this.makeupLoading) return;
+      this.makeupLoading = true;
+
+      try {
+        const res = await doMakeUpSignIn(this.selectedMakeupDate);
+        const makeupData = res.data;
+        
+        if (makeupData.success) {
+          this.showMakeupPopup = true;
+          this.makeupDates = this.makeupDates.filter(date => date !== this.selectedMakeupDate);
+          this.$store.commit('updateIntegration', currentPoints - 50);
+        } else {
+          this.showErrorPopup(makeupData.message || '补签失败');
+        }
+
+      } catch (err) {
+        const errorMsg = err.response?.data?.message || '补签请求失败';
+        this.showErrorPopup(errorMsg);
+        if (err.response?.data?.currentIntegration !== undefined) {
+          this.$store.commit('updateIntegration', err.response.data.currentIntegration);
+        }
+
+      } finally {
+        this.makeupLoading = false;
+      }
+    },
+
+    closePopup() {
+      this.showSuccessPopup = false;
+      this.showMakeupPopup = false;
+      this.showSystemErrorPopup = false;
+      this.showCustomError = false;
+      this.systemErrorMsg = '';
+      this.customErrorMsg = '';
     },
 
     handleAvatarClick() {
@@ -547,8 +796,8 @@ export default {
 		color: #666666;
 	}
 
-	/* 签到入口样式 */
-	.sign-entry-section {
+	/* 签到区域 */
+	.sign-section {
 		background: #FFFFFF;
 		border-radius: 16upx;
 		box-shadow: 0 4upx 16upx rgba(0, 0, 0, 0.08);
@@ -556,57 +805,187 @@ export default {
 		padding: 32upx;
 		transition: box-shadow 0.3s ease;
 	}
-	.sign-entry-section:hover {
+	.sign-section:hover {
 		box-shadow: 0 8upx 24upx rgba(0, 0, 0, 0.1);
 	}
-	.entry-card {
-		display: flex;
-		flex-direction: column;
-		gap: 24upx;
+	.loading {
+		text-align: center;
+		padding: 60upx 0;
 	}
-	.entry-header {
+	.loading-spinner {
+		width: 48upx;
+		height: 48upx;
+		border: 4upx solid rgba(255, 152, 0, 0.2);
+		border-top-color: #FF9800;
+		border-radius: 50%;
+		margin: 0 auto 20upx;
+		animation: spin 1s linear infinite;
+	}
+	@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
+	.loading-text {
+		font-size: 26upx;
+		color: #999999;
+	}
+	.sign-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		margin-bottom: 28upx;
 	}
-	.entry-title {
+	.sign-title {
 		font-size: 32upx;
 		color: #333333;
 		font-weight: 600;
 	}
-	.entry-desc {
+	.sign-streak {
+		display: flex;
+		align-items: center;
 		font-size: 24upx;
 		color: #FF9800;
 		background: rgba(255, 152, 0, 0.1);
 		padding: 6upx 16upx;
 		border-radius: 20upx;
 	}
-	.goto-sign-btn {
+	.streak-icon {
+		margin-right: 10upx;
+		font-size: 28upx;
+	}
+	.sign-btn {
 		width: 100%;
 		height: 96upx;
 		line-height: 96upx;
-		background: linear-gradient(90deg, #FF9800, #FF7A45);
-		color: #FFFFFF;
+		text-align: center;
 		border-radius: 16upx;
+		margin: 10upx 0 28upx;
 		font-size: 32upx;
 		font-weight: 600;
+		transition: all 0.2s ease;
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		gap: 12upx;
-		transition: all 0.2s ease;
 	}
-	.goto-sign-btn:active {
+	.sign-btn.can-sign {
+		background: linear-gradient(90deg, #FF9800, #FF7A45);
+		color: #FFFFFF;
+		box-shadow: 0 6upx 16upx rgba(255, 122, 69, 0.3);
+	}
+	.sign-btn.can-sign:active {
 		transform: scale(0.98);
 		opacity: 0.95;
 		box-shadow: 0 4upx 12upx rgba(255, 122, 69, 0.2);
 	}
-	.entry-footer {
-		text-align: center;
-	}
-	.footer-text {
-		font-size: 22upx;
+	.sign-btn.loading {
+		background: #F5F5F5;
 		color: #999999;
+		cursor: not-allowed;
+	}
+	.btn-spinner {
+		width: 32upx;
+		height: 32upx;
+		border: 2upx solid rgba(153, 153, 153, 0.2);
+		border-top-color: #999999;
+		border-radius: 50%;
+		margin-right: 12upx;
+		animation: spin 1s linear infinite;
+	}
+	.signed-btn {
+		width: 100%;
+		height: 96upx;
+		line-height: 96upx;
+		text-align: center;
+		border-radius: 16upx;
+		margin: 10upx 0 28upx;
+		font-size: 32upx;
+		background: rgba(76, 175, 80, 0.1);
+		color: #4CAF50;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	.signed-icon {
+		margin-right: 12upx;
+		font-size: 36upx;
+	}
+	.makeup-area {
+		background: rgba(255, 152, 0, 0.05);
+		border-radius: 16upx;
+		padding: 24upx;
+		margin-top: 10upx;
+		border: 1upx solid rgba(255, 152, 0, 0.1);
+	}
+	.makeup-header {
+		margin-bottom: 24upx;
+	}
+	.makeup-title {
+		font-size: 28upx;
+		color: #FF9800;
+		font-weight: 600;
+		margin-bottom: 10upx;
+		display: block;
+	}
+	.makeup-desc {
+		font-size: 24upx;
+		color: #666666;
+		line-height: 36upx;
+	}
+	.date-selector {
+		background: #FFFFFF;
+		border-radius: 12upx;
+		padding: 20upx 24upx;
+		margin-bottom: 24upx;
+		box-shadow: 0 2upx 8upx rgba(0, 0, 0, 0.05);
+	}
+	.picker-view {
+		font-size: 26upx;
+		color: #333333;
+		display: flex;
+		align-items: center;
+	}
+	.picker-icon {
+		margin-right: 12upx;
+		color: #FF9800;
+	}
+	.makeup-btn-container {
+		width: 100%;
+	}
+	.makeup-btn {
+		width: 100%;
+		height: 88upx;
+		line-height: 88upx;
+		background: linear-gradient(90deg, #FFB74D, #FF9800);
+		color: #FFFFFF;
+		border-radius: 12upx;
+		font-size: 28upx;
+		border: none;
+		font-weight: 500;
+		transition: all 0.2s ease;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	.makeup-btn:disabled {
+		background: #FFCC80;
+		color: #FFFFFF;
+		cursor: not-allowed;
+	}
+	.makeup-btn:active {
+		transform: scale(0.98);
+		box-shadow: 0 4upx 12upx rgba(255, 152, 0, 0.2);
+	}
+	.makeup-icon {
+		margin-right: 12upx;
+	}
+	.makeup-spinner {
+		width: 28upx;
+		height: 28upx;
+		border: 2upx solid rgba(255, 255, 255, 0.3);
+		border-top-color: #FFFFFF;
+		border-radius: 50%;
+		margin-right: 12upx;
+		animation: spin 1s linear infinite;
 	}
 
 	/* 未登录提示 */
@@ -749,6 +1128,110 @@ export default {
 	}
 	.list-cell-hover::after {
 		color: #FF9800;
+	}
+
+	/* 弹窗样式 */
+	.popup-mask {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.5);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 999;
+		backdrop-filter: blur(4upx);
+	}
+	.popup-content {
+		background: #FFFFFF;
+		border-radius: 24upx;
+		padding: 48upx;
+		width: 85%;
+		max-width: 500upx;
+		text-align: center;
+		box-shadow: 0 10upx 40upx rgba(0, 0, 0, 0.2);
+		transform: scale(0.95);
+		animation: popupShow 0.3s ease forwards;
+	}
+	@keyframes popupShow {
+		100% { transform: scale(1); }
+	}
+	.popup-content.success {
+		border: 1upx solid rgba(76, 175, 80, 0.2);
+	}
+	.popup-content.makeup {
+		border: 1upx solid rgba(255, 152, 0, 0.2);
+	}
+	.popup-content.system-error {
+		background: #FFFDF5;
+		border: 1upx solid #FFF0CC;
+	}
+	.popup-icon {
+		font-size: 72upx;
+		display: block;
+		margin-bottom: 28upx;
+	}
+	.popup-content.success .popup-icon {
+		color: #4CAF50;
+	}
+	.popup-content.makeup .popup-icon {
+		color: #FF9800;
+	}
+	.popup-content.system-error .popup-icon {
+		color: #FFC107;
+	}
+	.popup-title {
+		font-size: 34upx;
+		font-weight: 600;
+		color: #333333;
+		margin-bottom: 24upx;
+	}
+	.popup-content.system-error .popup-title {
+		color: #FF8C00;
+	}
+	.popup-desc {
+		font-size: 26upx;
+		color: #666666;
+		margin-bottom: 20upx;
+		line-height: 44upx;
+	}
+	.popup-tip {
+		font-size: 22upx;
+		color: #999999;
+		margin-bottom: 36upx;
+	}
+	.popup-streak, .popup-cost {
+		font-size: 24upx;
+		color: #999999;
+		margin-bottom: 36upx;
+	}
+	.popup-confirm {
+		width: 100%;
+		height: 88upx;
+		line-height: 88upx;
+		border-radius: 16upx;
+		font-size: 28upx;
+		border: none;
+		font-weight: 500;
+		transition: all 0.2s ease;
+	}
+	.success-confirm {
+		background: #4CAF50;
+		color: #FFFFFF;
+	}
+	.makeup-confirm {
+		background: #FF9800;
+		color: #FFFFFF;
+	}
+	.error-confirm {
+		background: #FF9800;
+		color: #FFFFFF;
+	}
+	.popup-confirm:active {
+		transform: scale(0.98);
+		opacity: 0.95;
 	}
 
 	/* 错误提示弹窗 */

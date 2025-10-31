@@ -103,7 +103,7 @@
 			align-self: center;
 			font-size:30upx;
 			color:$font-color-base;
-			margin-left:$uni-spacing-row-sm;
+			margin-left:$page-row-spacing; /* 替换为 $page-row-spacing */
 		}
 		.cell-tit{
 			flex: 1;

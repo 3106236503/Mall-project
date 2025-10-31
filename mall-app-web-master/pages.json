@@ -260,6 +260,20 @@
 					}
 				}
 			}
+		},
+		{
+			"path" : "pages/user/signInRecords/signInRecords",
+			"style" : 
+			{
+				"navigationBarTitleText" : ""
+			}
+		},
+		{
+			"path" : "pages/user/sigin",
+			"style" : 
+			{
+				"navigationBarTitleText" : ""
+			}
 		}
 	],
 	"globalStyle": {

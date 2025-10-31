@@ -57,7 +57,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     @Override
     public UmsMember getByUsername(String username) {
         UmsMember member = memberCacheService.getMember(username);
-        if(member!=null) return member;
+        if (member != null) return member;
         UmsMemberExample example = new UmsMemberExample();
         example.createCriteria().andUsernameEqualTo(username);
         List<UmsMember> memberList = memberMapper.selectByExample(example);
@@ -77,7 +77,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     @Override
     public void register(String username, String password, String telephone, String authCode) {
         //验证验证码
-        if(!verifyAuthCode(authCode,telephone)){
+        if (!verifyAuthCode(authCode, telephone)) {
             Asserts.fail("验证码错误");
         }
         //查询是否已有该用户
@@ -110,10 +110,10 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     public String generateAuthCode(String telephone) {
         StringBuilder sb = new StringBuilder();
         Random random = new Random();
-        for(int i=0;i<6;i++){
+        for (int i = 0; i < 6; i++) {
             sb.append(random.nextInt(10));
         }
-        memberCacheService.setAuthCode(telephone,sb.toString());
+        memberCacheService.setAuthCode(telephone, sb.toString());
         return sb.toString();
     }
 
@@ -122,11 +122,11 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         UmsMemberExample example = new UmsMemberExample();
         example.createCriteria().andPhoneEqualTo(telephone);
         List<UmsMember> memberList = memberMapper.selectByExample(example);
-        if(CollectionUtils.isEmpty(memberList)){
+        if (CollectionUtils.isEmpty(memberList)) {
             Asserts.fail("该账号不存在");
         }
         //验证验证码
-        if(!verifyAuthCode(authCode,telephone)){
+        if (!verifyAuthCode(authCode, telephone)) {
             Asserts.fail("验证码错误");
         }
         UmsMember umsMember = memberList.get(0);
@@ -139,13 +139,41 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     public UmsMember getCurrentMember() {
         SecurityContext ctx = SecurityContextHolder.getContext();
         Authentication auth = ctx.getAuthentication();
-        MemberDetails memberDetails = (MemberDetails) auth.getPrincipal();
-        return memberDetails.getUmsMember();
+
+        // 检查认证信息是否存在
+        if (auth == null) {
+            LOGGER.warn("未找到认证信息，用户未登录");
+            return null;
+        }
+
+        Object principal = auth.getPrincipal();
+
+        // 检查principal的类型
+        if (principal instanceof MemberDetails) {
+            // 如果是MemberDetails类型，直接获取会员信息
+            MemberDetails memberDetails = (MemberDetails) principal;
+            return memberDetails.getUmsMember();
+        } else if (principal instanceof String) {
+            // 如果是String类型（用户名），根据用户名查询会员信息
+            String username = (String) principal;
+            LOGGER.debug("根据用户名查询会员信息: {}", username);
+            return getByUsername(username);
+        } else if (principal instanceof UserDetails) {
+            // 如果是其他UserDetails类型，尝试获取用户名并查询
+            UserDetails userDetails = (UserDetails) principal;
+            String username = userDetails.getUsername();
+            LOGGER.debug("根据UserDetails用户名查询会员信息: {}", username);
+            return getByUsername(username);
+        } else {
+            // 未知类型，记录日志并返回null
+            LOGGER.warn("未知的Principal类型: {}", principal != null ? principal.getClass().getName() : "null");
+            return null;
+        }
     }
 
     @Override
     public void updateIntegration(Long id, Integer integration) {
-        UmsMember record=new UmsMember();
+        UmsMember record = new UmsMember();
         record.setId(id);
         record.setIntegration(integration);
         memberMapper.updateByPrimaryKeySelective(record);
@@ -155,7 +183,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     @Override
     public UserDetails loadUserByUsername(String username) {
         UmsMember member = getByUsername(username);
-        if(member!=null){
+        if (member != null) {
             return new MemberDetails(member);
         }
         throw new UsernameNotFoundException("用户名或密码错误");
@@ -167,7 +195,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         //密码需要客户端加密后传递
         try {
             UserDetails userDetails = loadUserByUsername(username);
-            if(!passwordEncoder.matches(password,userDetails.getPassword())){
+            if (!passwordEncoder.matches(password, userDetails.getPassword())) {
                 throw new BadCredentialsException("密码不正确");
             }
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -185,8 +213,8 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     }
 
     //对输入的验证码进行校验
-    private boolean verifyAuthCode(String authCode, String telephone){
-        if(StrUtil.isEmpty(authCode)){
+    private boolean verifyAuthCode(String authCode, String telephone) {
+        if (StrUtil.isEmpty(authCode)) {
             return false;
         }
         String realAuthCode = memberCacheService.getAuthCode(telephone);

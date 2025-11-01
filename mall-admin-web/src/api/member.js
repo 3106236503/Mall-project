@@ -55,4 +55,31 @@ export function getMemberInfo(id) {
   })
 }
 
+// 充值会员积分
+export function updateIntegration(id, params) {
+  return request({
+    url: '/member/recharge',
+    method: 'post',
+    params: {
+      id: id,
+      integration: params.integration,
+      operateNote: params.operateNote // 备注参数
+    }
+  })
+}
+
+// 适配后端分页接口，传递 pageNum、pageSize 参数
+export function fetchPointRecord(params) {
+  return request({
+    url: '/member/history',
+    method: 'GET',
+    params: {
+      memberId: params.memberId,
+      pageNum: params.pageNum || 1,
+      pageSize: params.pageSize || 10
+    }
+  });
+}
+
+
 

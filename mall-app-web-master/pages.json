@@ -226,7 +226,7 @@
 					}
 				}
 			}
-		},{
+		}, {
 			"path": "pages/user/productCollection",
 			"style": {
 				"enablePullDownRefresh": true,
@@ -243,7 +243,7 @@
 					}
 				}
 			}
-		},{
+		}, {
 			"path": "pages/user/brandAttention",
 			"style": {
 				"enablePullDownRefresh": true,
@@ -262,17 +262,18 @@
 			}
 		},
 		{
-			"path" : "pages/user/signInRecords/signInRecords",
-			"style" : 
-			{
-				"navigationBarTitleText" : ""
+			"path": "pages/user/signInRecords/signInRecords",
+			"style": {
+				"navigationBarTitleText": "我的积分改变记录",
+				"enablePullDownRefresh": true, // ✅ 启用下拉刷新（关键配置）
+				"backgroundColor": "#F5F5F5", // 下拉刷新区域背景色（匹配页面背景）
+				"backgroundTextStyle": "dark" // 刷新动画颜色（dark=黑色，light=白色，适配背景）
 			}
 		},
 		{
-			"path" : "pages/user/sigin",
-			"style" : 
-			{
-				"navigationBarTitleText" : ""
+			"path": "pages/user/sigin",
+			"style": {
+				"navigationBarTitleText": ""
 			}
 		}
 	],

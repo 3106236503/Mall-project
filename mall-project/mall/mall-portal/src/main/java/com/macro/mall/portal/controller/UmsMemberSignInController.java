@@ -1,6 +1,9 @@
 package com.macro.mall.portal.controller;
 
 import com.macro.mall.common.api.CommonResult;
+import com.macro.mall.mapper.UmsIntegrationChangeHistoryMapper;
+import com.macro.mall.model.UmsIntegrationChangeHistory;
+import com.macro.mall.model.UmsIntegrationChangeHistoryExample;
 import com.macro.mall.model.UmsMember;
 import com.macro.mall.portal.model.UmsMemberSignInRecord;
 import com.macro.mall.portal.service.UmsMemberService;
@@ -29,6 +32,9 @@ public class UmsMemberSignInController {
 
     @Autowired
     private UmsMemberService memberService;
+
+    @Autowired
+    private UmsIntegrationChangeHistoryMapper integrationChangeHistoryMapper;
 
 
     @ApiOperation("会员签到")
@@ -152,6 +158,29 @@ public class UmsMemberSignInController {
 
         Integer totalDays = signInService.getTotalSignDays(currentMember.getId());
         return CommonResult.success(totalDays);
+    }
+
+    //查询会员积分改变记录
+    @ApiOperation("查询会员积分改变记录")
+    @RequestMapping(value = "/pointsRecords", method = RequestMethod.GET)
+    @ResponseBody
+    public CommonResult getMemberPointsRecords() {
+        UmsMember currentMember = memberService.getCurrentMember();
+        if (currentMember == null) {
+            return CommonResult.unauthorized("请先登录");
+        }
+
+        UmsIntegrationChangeHistoryExample example = new UmsIntegrationChangeHistoryExample();
+
+        example.setOrderByClause("create_time DESC");
+
+        //从token中获取会员ID
+        Long memberId = currentMember.getId();
+
+        example.createCriteria().andMemberIdEqualTo(memberId);
+
+        List<UmsIntegrationChangeHistory> historyList = integrationChangeHistoryMapper.selectByExample(example);
+        return CommonResult.success(historyList);
     }
 
 }

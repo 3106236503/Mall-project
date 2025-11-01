@@ -17,3 +17,11 @@ export function memberInfo() {
 		url: '/sso/info'
 	})
 }
+
+
+export const getMemberPointRecords = () => {
+  return request({
+    url: '/sso/signIn/pointsRecords', 
+    method: 'GET'
+  });
+};

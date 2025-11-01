@@ -1,6 +1,8 @@
 package com.macro.mall.portal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.macro.mall.mapper.UmsIntegrationChangeHistoryMapper;
+import com.macro.mall.model.UmsIntegrationChangeHistory;
 import com.macro.mall.model.UmsMember;
 import com.macro.mall.portal.mapper.UmsMemberMapperPlus;
 import com.macro.mall.portal.mapper.UmsMemberSignInRecordMapper;
@@ -25,6 +27,9 @@ public class UmsMemberSignInServiceImpl implements UmsMemberSignInService {
 
     @Autowired
     private UmsMemberService memberService;
+
+    @Autowired
+    private UmsIntegrationChangeHistoryMapper integrationChangeHistoryMapper;
 
     // 基础签到积分
     private static final int BASE_INTEGRATION = 10;
@@ -75,7 +80,7 @@ public class UmsMemberSignInServiceImpl implements UmsMemberSignInService {
         }
 
 
-        UmsMemberSignInRecord lastRecord = signInRecordMapper.selectLatestSignInRecord(memberId);
+        UmsMember lastRecord = memberService.getById(memberId);
 
         // 添加空值检查
         int lastIntegration = (lastRecord != null) ? lastRecord.getIntegration() : 0;
@@ -98,6 +103,18 @@ public class UmsMemberSignInServiceImpl implements UmsMemberSignInService {
             record.setCreateTime(new Date());
 
             signInRecordMapper.insert(record);
+
+            // 创建积分变更记录
+            UmsIntegrationChangeHistory changeHistory = new UmsIntegrationChangeHistory();
+            changeHistory.setMemberId(memberId);
+            changeHistory.setChangeType(0); // 签到获得积分
+            changeHistory.setChangeCount(integration);
+            changeHistory.setSourceType(2); // 签到
+            changeHistory.setOperateMan(currentMember.getUsername());
+            changeHistory.setCreateTime(new Date());
+
+            integrationChangeHistoryMapper.insert(changeHistory);
+
 
             // 更新会员积分和成长值
             UmsMember updateMember = new UmsMember();
@@ -195,6 +212,17 @@ public class UmsMemberSignInServiceImpl implements UmsMemberSignInService {
         record.setCreateTime(new Date());
 
         signInRecordMapper.insert(record);
+
+        // 创建积分变更记录
+        UmsIntegrationChangeHistory changeHistory = new UmsIntegrationChangeHistory();
+        changeHistory.setMemberId(memberId);
+        changeHistory.setChangeType(1); // 补签消耗积分
+        changeHistory.setChangeCount(MAKE_UP_COST);
+        changeHistory.setSourceType(4); // 补签消耗积分
+        changeHistory.setOperateMan(currentMember.getUsername());
+        changeHistory.setCreateTime(new Date());
+
+        integrationChangeHistoryMapper.insert(changeHistory);
 
         // 扣除积分，更新总积分
         UmsMember updateMember = new UmsMember();

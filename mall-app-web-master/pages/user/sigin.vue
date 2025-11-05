@@ -229,9 +229,15 @@ const formatApiDate = (dateStr) => {
 const getTodayDate = () => formatApiDate(new Date().toISOString());
 
 // 工具函数：计算今日奖励
+//const calcTodayReward = (continuousDays) => {
+ // const rewards = [5, 8, 10, 12, 15, 18, 20];
+  //return rewards[Math.min(continuousDays, 6)]; // 连续7天及以上保持20积分
+//};
+
+// 工具函数：计算今日奖励（7的倍数得20积分，其他得10积分）
 const calcTodayReward = (continuousDays) => {
-  const rewards = [5, 8, 10, 12, 15, 18, 20];
-  return rewards[Math.min(continuousDays, 6)]; // 连续7天及以上保持20积分
+  // 连续签到天数>0且是7的倍数，返回20积分；否则返回10积分
+  return continuousDays > 0 && continuousDays % 7 === 0 ? 20 : 10;
 };
 
 export default {
@@ -316,7 +322,7 @@ export default {
           getMemberPoints(),
           getTotalSignDays(),
           getSignInRecords(this.currentYear, this.currentMonth),
-          getContinuousSignInDays()
+          getContinuousSignInDays(),
         ]);
         // 更新积分/成长值
         const pointsData = pointsRes.data || {};
@@ -436,7 +442,7 @@ export default {
         this.showCelebration = true;
       } catch (err) {
         this.signLoading = false;
-        this.showPopupFn('error', '签到失败', err.message || '请稍后重试');
+        this.showPopupFn('error', '签到失败', err.data.message || '请稍后重试');
       }
     },
 
@@ -466,7 +472,8 @@ export default {
         this.showPopupFn('success', '补签成功', `消耗50积分，获得${data.integration || 0}积分，剩余${newInt}分`);
       } catch (err) {
         this.makeupLoading = false;
-        this.showPopupFn('error', '补签失败', err.message || '请稍后重试');
+		console.log(err);
+        this.showPopupFn('error', '补签失败', err.data.message || '请稍后重试');
       }
     },
 

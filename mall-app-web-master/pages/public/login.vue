@@ -67,6 +67,7 @@
 					password: this.password
 				}).then(response => {
 					let token = response.data.tokenHead+response.data.token;
+					console.log("token" + token)
 					uni.setStorageSync('token',token);
 					uni.setStorageSync('username',this.username);
 					uni.setStorageSync('password',this.password);

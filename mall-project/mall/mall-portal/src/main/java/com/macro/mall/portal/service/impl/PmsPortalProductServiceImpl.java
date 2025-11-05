@@ -9,12 +9,16 @@ import com.macro.mall.portal.dao.PortalProductDao;
 import com.macro.mall.portal.domain.PmsPortalProductDetail;
 import com.macro.mall.portal.domain.PmsProductCategoryNode;
 import com.macro.mall.portal.service.PmsPortalProductService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 /**
  * 前台订单管理Service实现类
@@ -40,6 +44,9 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
     private PmsProductFullReductionMapper productFullReductionMapper;
     @Autowired
     private PortalProductDao portalProductDao;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PmsPortalProductServiceImpl.class);
+
 
     @Override
     public List<PmsProduct> search(String keyword, Long brandId, Long productCategoryId, Integer pageNum, Integer pageSize, Integer sort) {
@@ -83,48 +90,137 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
 
     @Override
     public PmsPortalProductDetail detail(Long id) {
+        LOGGER.info("开始获取商品详情，商品ID: {}", id);
+
         PmsPortalProductDetail result = new PmsPortalProductDetail();
-        //获取商品信息
+
+        // 获取商品信息
+        LOGGER.debug("查询商品基本信息，ID: {}", id);
         PmsProduct product = productMapper.selectByPrimaryKey(id);
-        result.setProduct(product);
-        //获取品牌信息
-        PmsBrand brand = brandMapper.selectByPrimaryKey(product.getBrandId());
-        result.setBrand(brand);
-        //获取商品属性信息
-        PmsProductAttributeExample attributeExample = new PmsProductAttributeExample();
-        attributeExample.createCriteria().andProductAttributeCategoryIdEqualTo(product.getProductAttributeCategoryId());
-        List<PmsProductAttribute> productAttributeList = productAttributeMapper.selectByExample(attributeExample);
-        result.setProductAttributeList(productAttributeList);
-        //获取商品属性值信息
-        if(CollUtil.isNotEmpty(productAttributeList)){
-            List<Long> attributeIds = productAttributeList.stream().map(PmsProductAttribute::getId).collect(Collectors.toList());
-            PmsProductAttributeValueExample attributeValueExample = new PmsProductAttributeValueExample();
-            attributeValueExample.createCriteria().andProductIdEqualTo(product.getId())
-                    .andProductAttributeIdIn(attributeIds);
-            List<PmsProductAttributeValue> productAttributeValueList = productAttributeValueMapper.selectByExample(attributeValueExample);
-            result.setProductAttributeValueList(productAttributeValueList);
+        if (product == null) {
+            LOGGER.error("商品不存在，ID: {}", id);
+            throw new RuntimeException("商品不存在，ID: " + id);
         }
-        //获取商品SKU库存信息
+        LOGGER.debug("商品信息查询成功，商品名称: {}, 品牌ID: {}, 分类ID: {}",
+                product.getName(), product.getBrandId(), product.getProductCategoryId());
+        result.setProduct(product);
+
+        // 获取品牌信息（增加空值检查）
+        if (product.getBrandId() != null) {
+            LOGGER.debug("查询品牌信息，品牌ID: {}", product.getBrandId());
+            PmsBrand brand = brandMapper.selectByPrimaryKey(product.getBrandId());
+            if (brand != null) {
+                LOGGER.debug("品牌信息查询成功，品牌名称: {}", brand.getName());
+                result.setBrand(brand);
+            } else {
+                LOGGER.warn("品牌信息不存在，品牌ID: {}", product.getBrandId());
+            }
+        } else {
+            LOGGER.debug("商品无品牌信息，跳过品牌查询");
+        }
+
+        // 获取商品属性信息（增加空值检查）
+        if (product.getProductAttributeCategoryId() != null) {
+            LOGGER.debug("查询商品属性信息，属性分类ID: {}", product.getProductAttributeCategoryId());
+            PmsProductAttributeExample attributeExample = new PmsProductAttributeExample();
+            attributeExample.createCriteria().andProductAttributeCategoryIdEqualTo(product.getProductAttributeCategoryId());
+            List<PmsProductAttribute> productAttributeList = productAttributeMapper.selectByExample(attributeExample);
+
+            if (CollUtil.isNotEmpty(productAttributeList)) {
+                LOGGER.debug("查询到 {} 个商品属性", productAttributeList.size());
+                result.setProductAttributeList(productAttributeList);
+
+                // 获取商品属性值信息
+                LOGGER.debug("查询商品属性值信息");
+                List<Long> attributeIds = productAttributeList.stream().map(PmsProductAttribute::getId).collect(Collectors.toList());
+                PmsProductAttributeValueExample attributeValueExample = new PmsProductAttributeValueExample();
+                attributeValueExample.createCriteria().andProductIdEqualTo(product.getId())
+                        .andProductAttributeIdIn(attributeIds);
+                List<PmsProductAttributeValue> productAttributeValueList = productAttributeValueMapper.selectByExample(attributeValueExample);
+
+                if (CollUtil.isNotEmpty(productAttributeValueList)) {
+                    LOGGER.debug("查询到 {} 个商品属性值", productAttributeValueList.size());
+                    result.setProductAttributeValueList(productAttributeValueList);
+                } else {
+                    LOGGER.warn("未查询到商品属性值信息");
+                }
+            } else {
+                LOGGER.warn("未查询到商品属性信息，属性分类ID: {}", product.getProductAttributeCategoryId());
+            }
+        } else {
+            LOGGER.debug("商品无属性分类信息，跳过属性查询");
+        }
+
+        // 获取商品SKU库存信息
+        LOGGER.debug("查询商品SKU库存信息");
         PmsSkuStockExample skuExample = new PmsSkuStockExample();
         skuExample.createCriteria().andProductIdEqualTo(product.getId());
         List<PmsSkuStock> skuStockList = skuStockMapper.selectByExample(skuExample);
-        result.setSkuStockList(skuStockList);
-        //商品阶梯价格设置
-        if(product.getPromotionType()==3){
+
+        if (CollUtil.isNotEmpty(skuStockList)) {
+            LOGGER.debug("查询到 {} 个SKU库存信息", skuStockList.size());
+            result.setSkuStockList(skuStockList);
+        } else {
+            LOGGER.warn("未查询到SKU库存信息");
+        }
+
+        // 商品阶梯价格设置（增加空值检查）
+        if (product.getPromotionType() != null && product.getPromotionType() == 3) {
+            LOGGER.debug("查询商品阶梯价格信息，促销类型: 阶梯价格");
             PmsProductLadderExample ladderExample = new PmsProductLadderExample();
             ladderExample.createCriteria().andProductIdEqualTo(product.getId());
             List<PmsProductLadder> productLadderList = productLadderMapper.selectByExample(ladderExample);
-            result.setProductLadderList(productLadderList);
+
+            if (CollUtil.isNotEmpty(productLadderList)) {
+                LOGGER.debug("查询到 {} 个阶梯价格设置", productLadderList.size());
+                result.setProductLadderList(productLadderList);
+            } else {
+                LOGGER.warn("未查询到阶梯价格设置");
+            }
+        } else {
+            LOGGER.debug("商品促销类型不是阶梯价格，跳过阶梯价格查询");
         }
-        //商品满减价格设置
-        if(product.getPromotionType()==4){
+
+        // 商品满减价格设置（增加空值检查）
+        if (product.getPromotionType() != null && product.getPromotionType() == 4) {
+            LOGGER.debug("查询商品满减价格信息，促销类型: 满减价格");
             PmsProductFullReductionExample fullReductionExample = new PmsProductFullReductionExample();
             fullReductionExample.createCriteria().andProductIdEqualTo(product.getId());
             List<PmsProductFullReduction> productFullReductionList = productFullReductionMapper.selectByExample(fullReductionExample);
-            result.setProductFullReductionList(productFullReductionList);
+
+            if (CollUtil.isNotEmpty(productFullReductionList)) {
+                LOGGER.debug("查询到 {} 个满减价格设置", productFullReductionList.size());
+                result.setProductFullReductionList(productFullReductionList);
+            } else {
+                LOGGER.warn("未查询到满减价格设置");
+            }
+        } else {
+            LOGGER.debug("商品促销类型不是满减价格，跳过满减价格查询");
         }
-        //商品可用优惠券
-        result.setCouponList(portalProductDao.getAvailableCouponList(product.getId(),product.getProductCategoryId()));
+
+        // 商品可用优惠券（增加空值检查）
+        if (product.getProductCategoryId() != null) {
+            try {
+                LOGGER.debug("查询商品可用优惠券信息，分类ID: {}", product.getProductCategoryId());
+                List<SmsCoupon> couponList = portalProductDao.getAvailableCouponList(product.getId(), product.getProductCategoryId());
+
+                if (CollUtil.isNotEmpty(couponList)) {
+                    LOGGER.debug("查询到 {} 个可用优惠券", couponList.size());
+                    result.setCouponList(couponList);
+                } else {
+                    LOGGER.debug("未查询到可用优惠券");
+                    result.setCouponList(new ArrayList<>());
+                }
+            } catch (Exception e) {
+                LOGGER.error("查询优惠券信息时发生异常", e);
+                result.setCouponList(new ArrayList<>());
+            }
+        } else {
+            LOGGER.debug("商品无分类信息，跳过优惠券查询");
+            result.setCouponList(new ArrayList<>());
+        }
+
+        LOGGER.info("商品详情获取完成，商品ID: {}, 商品名称: {}", id, product.getName());
         return result;
     }
 

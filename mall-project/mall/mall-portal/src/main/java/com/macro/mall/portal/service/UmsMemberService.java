@@ -44,7 +44,7 @@ public interface UmsMemberService {
     /**
      * 根据会员id修改会员积分
      */
-    void updateIntegration(Long id,Integer integration);
+    void updateIntegration(Long id, Integer integration);
 
 
     /**
@@ -61,4 +61,9 @@ public interface UmsMemberService {
      * 刷新token
      */
     String refreshToken(String token);
+
+    /**
+     * 校验用户状态
+     */
+    boolean checkUserStatus(String username);
 }

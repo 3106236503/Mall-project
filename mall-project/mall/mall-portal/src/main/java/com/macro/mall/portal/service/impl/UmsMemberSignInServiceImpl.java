@@ -109,7 +109,7 @@ public class UmsMemberSignInServiceImpl implements UmsMemberSignInService {
             changeHistory.setMemberId(memberId);
             changeHistory.setChangeType(0); // 签到获得积分
             changeHistory.setChangeCount(integration);
-            changeHistory.setSourceType(2); // 签到
+            changeHistory.setSourceType(3); // 签到
             changeHistory.setOperateMan(currentMember.getUsername());
             changeHistory.setCreateTime(new Date());
 

@@ -88,7 +88,7 @@ export function getMemberSignInRecords() {
 }
 
 
-// 新增：查询累计签到总天数（解决报错的核心）
+
 /**
  * 查询累计签到总天数
  * @returns {Promise} 累计签到总天数
@@ -99,3 +99,4 @@ export function getTotalSignDays() {
         method: 'get'
     });
 }
+

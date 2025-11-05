@@ -24,8 +24,17 @@ public interface UmsMemberSignInRecordMapper extends BaseMapper<UmsMemberSignInR
     /**
      * 查询会员连续签到天数
      */
-    @Select("SELECT COUNT(*) FROM ums_member_sign_in_record WHERE member_id = #{memberId} AND sign_in_date >= (SELECT IFNULL(MAX(sign_in_date), '1970-01-01') FROM ums_member_sign_in_record WHERE member_id = #{memberId} AND sign_in_date < CURDATE() AND NOT EXISTS (SELECT 1 FROM ums_member_sign_in_record s2 WHERE s2.member_id = #{memberId} AND s2.sign_in_date = DATE_SUB(CURDATE(), INTERVAL 1 DAY))) AND sign_in_date <= CURDATE()")
+    @Select("SELECT COUNT(*) FROM (" +
+            "SELECT sign_in_date, " +
+            "@row_number := @row_number + 1 AS rn, " +
+            "DATEDIFF(CURDATE(), sign_in_date) AS diff " +
+            "FROM ums_member_sign_in_record, (SELECT @row_number := 0) AS r " +
+            "WHERE member_id = #{memberId} " +
+            "ORDER BY sign_in_date DESC" +
+            ") AS t " +
+            "WHERE rn - diff = 1")
     Integer selectContinuousSignInDays(@Param("memberId") Long memberId);
+
 
     /**
      * 查询会员某月签到记录

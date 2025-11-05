@@ -160,6 +160,7 @@ public class UmsMemberSignInController {
         return CommonResult.success(totalDays);
     }
 
+
     //查询会员积分改变记录
     @ApiOperation("查询会员积分改变记录")
     @RequestMapping(value = "/pointsRecords", method = RequestMethod.GET)

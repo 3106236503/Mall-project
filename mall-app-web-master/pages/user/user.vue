@@ -137,7 +137,7 @@
 				<list-cell 
 				  icon="icon-pingjia" 
 				  iconColor="#ee883b" 
-				  title="我的签到记录"
+				  title="积分历史"
 				  @eventClick="navTo('/pages/user/signInRecords/signInRecords')" 
 				  hover-class="list-cell-hover"
 				></list-cell>

@@ -1,9 +1,12 @@
 import Request from '@/js_sdk/luch-request/request.js'
-import { API_BASE_URL} from '@/utils/appConfig.js';
+import {
+	API_BASE_URL
+} from '@/utils/appConfig.js';
 
 const http = new Request()
 
-http.setConfig((config) => { /* 设置全局配置 */
+http.setConfig((config) => {
+	/* 设置全局配置 */
 	config.baseUrl = API_BASE_URL /* 根域名不同 */
 	config.header = {
 		...config.header
@@ -20,14 +23,17 @@ http.validateStatus = (statusCode) => {
 	return statusCode === 200
 }
 
-http.interceptor.request((config, cancel) => { /* 请求之前拦截器 */
+http.interceptor.request((config, cancel) => {
+	/* 请求之前拦截器 */
 	const token = uni.getStorageSync('token');
-	if(token){
+	// 清除所有 Token 及认证数据
+	//uni.clearStorageSync();
+	if (token) {
 		config.header = {
-			'Authorization':token,
+			'Authorization': token,
 			...config.header
 		}
-	}else{
+	} else {
 		config.header = {
 			...config.header
 		}
@@ -40,21 +46,22 @@ http.interceptor.request((config, cancel) => { /* 请求之前拦截器 */
 	return config
 })
 
-http.interceptor.response((response) => { /* 请求之后拦截器 */
+http.interceptor.response((response) => {
+	/* 请求之后拦截器 */
 	const res = response.data;
 	if (res.code !== 200) {
 		//提示错误信息
 		uni.showToast({
-			title:res.message,
-			duration:1500
+			title: res.message,
+			duration: 1500
 		})
 		//401未登录处理
 		if (res.code === 401) {
 			uni.showModal({
 				title: '提示',
 				content: '你已被登出，可以取消继续留在该页面，或者重新登录',
-				confirmText:'重新登录',
-				cancelText:'取消',
+				confirmText: '重新登录',
+				cancelText: '取消',
 				success: function(res) {
 					if (res.confirm) {
 						uni.navigateTo({
@@ -74,13 +81,13 @@ http.interceptor.response((response) => { /* 请求之后拦截器 */
 	//提示错误信息
 	console.log('response error', response);
 	uni.showToast({
-		title:response.errMsg,
-		duration:1500
+		title: response.errMsg,
+		duration: 1500
 	})
 	return Promise.reject(response);
 })
 
-export function request (options = {}) {
+export function request(options = {}) {
 	return http.request(options);
 }
 

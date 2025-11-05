@@ -189,12 +189,40 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         throw new UsernameNotFoundException("用户名或密码错误");
     }
 
+    /**
+     * 检查用户状态
+     *
+     * @param username 用户名
+     * @return 如果用户状态正常返回null，如果用户被冻结返回"用户被冻结"，如果用户不存在返回"用户名或密码错误"
+     */
+
+    @Override
+    public boolean checkUserStatus(String username) {
+        // 先查询数据库获取最新的用户状态（绕过缓存）
+        UmsMemberExample example = new UmsMemberExample();
+        example.createCriteria().andUsernameEqualTo(username);
+        List<UmsMember> memberList = memberMapper.selectByExample(example);
+
+        UmsMember latestMember = memberList.get(0);
+
+        // 检查用户是否被冻结
+        if (latestMember.getStatus() != 1) {
+            LOGGER.warn("用户被冻结，用户名: {}", username);
+            return false;
+        }
+        return true;
+    }
+
+
     @Override
     public String login(String username, String password) {
         String token = null;
+
+
         //密码需要客户端加密后传递
         try {
             UserDetails userDetails = loadUserByUsername(username);
+
             if (!passwordEncoder.matches(password, userDetails.getPassword())) {
                 throw new BadCredentialsException("密码不正确");
             }

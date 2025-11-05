@@ -2,7 +2,7 @@
 	<view class="point-record-container">
 		<!-- 标题栏 -->
 		<view class="page-header">
-			<text class="header-title">我的积分改变记录</text>
+			<text class="header-title">积分历史</text>
 		</view>
 
 		<!-- 加载状态（初始加载+下拉刷新复用） -->

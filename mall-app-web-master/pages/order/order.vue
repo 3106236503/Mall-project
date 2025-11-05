@@ -146,15 +146,28 @@
 				return statusTip;
 			},
 			formatProductAttr(jsonAttr) {
-				let attrArr = JSON.parse(jsonAttr);
-				let attrStr = '';
-				for (let attr of attrArr) {
-					attrStr += attr.key;
-					attrStr += ":";
-					attrStr += attr.value;
-					attrStr += ";";
-				}
-				return attrStr
+			  // 1. 先判断是否为有效值（排除undefined、null、空字符串）
+			  if (!jsonAttr || jsonAttr === '') return '';
+			  
+			  try {
+			    // 2. 尝试解析JSON，捕获解析异常
+			    let attrArr = JSON.parse(jsonAttr);
+			    // 3. 确保解析后是数组（防止后端返回非数组格式）
+			    if (!Array.isArray(attrArr)) return '';
+			    
+			    let attrStr = '';
+			    for (let attr of attrArr) {
+			      // 4. 校验每个属性是否有key和value（避免字段缺失报错）
+			      if (attr.key && attr.value) {
+			        attrStr += `${attr.key}:${attr.value};`;
+			      }
+			    }
+			    return attrStr;
+			  } catch (err) {
+			    // 5. 解析失败时打印日志（方便排查），返回空字符串不影响渲染
+			    console.warn('商品属性解析失败：', jsonAttr, err);
+			    return '';
+			  }
 			},
 			formatDateTime(time) {
 				if (time == null || time === '') {

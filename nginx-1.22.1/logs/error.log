@@ -1,0 +1,12 @@
+2025/11/05 15:17:37 [emerg] 30856#31308: bind() to 0.0.0.0:80 failed (10013: An attempt was made to access a socket in a way forbidden by its access permissions)
+2025/11/05 15:19:39 [emerg] 2488#17508: bind() to 0.0.0.0:80 failed (10013: An attempt was made to access a socket in a way forbidden by its access permissions)
+2025/11/05 15:53:04 [emerg] 20956#18960: bind() to 0.0.0.0:80 failed (10013: An attempt was made to access a socket in a way forbidden by its access permissions)
+2025/11/05 15:54:24 [emerg] 25448#13728: bind() to 0.0.0.0:80 failed (10013: An attempt was made to access a socket in a way forbidden by its access permissions)
+2025/11/05 15:54:26 [emerg] 8480#12684: bind() to 0.0.0.0:80 failed (10013: An attempt was made to access a socket in a way forbidden by its access permissions)
+2025/11/05 15:54:26 [emerg] 30388#31988: bind() to 0.0.0.0:80 failed (10013: An attempt was made to access a socket in a way forbidden by its access permissions)
+2025/11/05 15:54:28 [emerg] 11736#29304: bind() to 0.0.0.0:80 failed (10013: An attempt was made to access a socket in a way forbidden by its access permissions)
+2025/11/05 15:54:29 [emerg] 31764#7996: bind() to 0.0.0.0:80 failed (10013: An attempt was made to access a socket in a way forbidden by its access permissions)
+2025/11/05 15:54:30 [emerg] 13876#16676: bind() to 0.0.0.0:80 failed (10013: An attempt was made to access a socket in a way forbidden by its access permissions)
+2025/11/05 15:54:30 [emerg] 30596#28660: bind() to 0.0.0.0:80 failed (10013: An attempt was made to access a socket in a way forbidden by its access permissions)
+2025/11/05 17:29:59 [error] 11916#26060: *2 CreateFile() "D:\develop\nginx-1.22.1/html/favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:9092", referrer: "http://localhost:9092/"
+2025/11/05 17:30:01 [error] 11916#26060: *2 CreateFile() "D:\develop\nginx-1.22.1/html/.well-known/appspecific/com.chrome.devtools.json" failed (3: The system cannot find the path specified), client: 127.0.0.1, server: localhost, request: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1", host: "localhost:9092"

@@ -36,7 +36,7 @@ public class UmsMemberSignInServiceImpl implements UmsMemberSignInService {
     // 补签消耗积分
     private static final int MAKE_UP_COST = 50;
     // 连续签到奖励积分（每7天）
-    private static final int CONTINUOUS_REWARD = 20;
+    private static final int CONTINUOUS_REWARD = 10;
 
     @Override
     @Transactional
@@ -75,7 +75,8 @@ public class UmsMemberSignInServiceImpl implements UmsMemberSignInService {
 
         // 计算本次签到获得的积分
         int integration = BASE_INTEGRATION;
-        if ((currentContinuousDays + 1) % 7 == 0) {
+        // 连续签到7天以上每天额外奖励20分
+        if (currentContinuousDays >= 6) {  // 第7天开始（因为currentContinuousDays是已连续天数）
             integration += CONTINUOUS_REWARD;
         }
 

@@ -45,3 +45,11 @@
 2025/11/05 16:39:36 [error] 14360#26536: *35 CreateFile() "D:\develop\nginx-1.28.0/html/.well-known/appspecific/com.chrome.devtools.json" failed (3: The system cannot find the path specified), client: 127.0.0.1, server: localhost, request: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1", host: "localhost:9001"
 2025/11/05 16:39:45 [error] 14360#26536: *35 CreateFile() "D:\develop\nginx-1.28.0/html/.well-known/appspecific/com.chrome.devtools.json" failed (3: The system cannot find the path specified), client: 127.0.0.1, server: localhost, request: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1", host: "localhost:9001"
 2025/11/05 16:41:17 [error] 14360#26536: *41 CreateFile() "D:\develop\nginx-1.28.0/html/.well-known/appspecific/com.chrome.devtools.json" failed (3: The system cannot find the path specified), client: 127.0.0.1, server: localhost, request: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1", host: "localhost:9001"
+2025/11/05 17:53:01 [emerg] 31476#30392: "server" directive is not allowed here in D:\mall\nginx-1.28.0/conf/nginx.conf:51
+2025/11/05 17:55:44 [emerg] 28052#16352: "server" directive is not allowed here in D:\mall\nginx-1.28.0/conf/nginx.conf:51
+2025/11/05 17:59:23 [emerg] 9244#24840: "server" directive is not allowed here in D:\mall\nginx-1.28.0/conf/nginx.conf:51
+2025/11/05 17:59:51 [emerg] 20636#25052: "server" directive is not allowed here in D:\mall\nginx-1.28.0/conf/nginx.conf:51
+2025/11/05 18:00:55 [emerg] 30972#7712: "server" directive is not allowed here in D:\mall\nginx-1.28.0/conf/nginx.conf:51
+2025/11/05 18:01:51 [emerg] 7916#11464: "server" directive is not allowed here in D:\mall\nginx-1.28.0/conf/nginx.conf:51
+2025/11/05 18:05:58 [error] 23420#25140: *1 CreateFile() "D:\mall\nginx-1.28.0\dist/favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:9003", referrer: "http://localhost:9003/"
+2025/11/05 18:06:00 [error] 23420#25140: *1 CreateFile() "D:\mall\nginx-1.28.0\dist/.well-known/appspecific/com.chrome.devtools.json" failed (3: The system cannot find the path specified), client: 127.0.0.1, server: localhost, request: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1", host: "localhost:9003"
